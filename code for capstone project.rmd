@@ -1,0 +1,63 @@
+---
+title: "Capstone Project"
+author: "Tejaswi Lavanya"
+urlcolor: blue
+output:
+  pdf_document: default
+---
+```{r, eval=TRUE, include=FALSE, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(eval=FALSE, include=FALSE, echo=FALSE, message=FALSE, warning=FALSE)
+```
+```{r, eval=TRUE}
+tinytex::install_tinytex(force = TRUE)
+install.packages("tidyverse", repos = "http://cran.us.r-project.org")
+install.packages("readxl", repos = "http://cran.us.r-project.org")
+install.packages("dplyr", repos = "http://cran.us.r-project.org")
+library(tidyverse)
+library(dplyr)
+library(readxl)
+```
+
+```{r, eval=TRUE, include=TRUE, message=TRUE, echo=FALSE}
+UAStats <- read_excel("C:\\Users\\tempo\\OneDrive\\Documents\\United Airlines Aircraft Operating Statistics- Actuals (2).xls")
+UAStats_cleaned <- UAStats %>% slice(2, 3, 12, 47, 48, 99, 108, 143, 144)
+Stats_cleaned <- t(UAStats_cleaned)
+Stats_cleaned <- Stats_cleaned[-1,]
+colnames(Stats_cleaned) <- as.character(unlist(Stats_cleaned[1,]))
+Stats_cleaned <- Stats_cleaned[-1,]
+colnames(Stats_cleaned)[1] = 'year'
+colnames(Stats_cleaned)[3] = 'fuelsnb'
+colnames(Stats_cleaned)[4] = 'milessnb'
+colnames(Stats_cleaned)[5] = 'gallonssnb'
+colnames(Stats_cleaned)[7] = 'fuelwb'
+colnames(Stats_cleaned)[8] = 'mileswb'
+colnames(Stats_cleaned)[9] = 'gallonswb'
+head(Stats_cleaned)
+View(Stats_cleaned)
+```
+
+
+```{r, eval=TRUE, include=TRUE, message=TRUE, echo=FALSE}
+dataframe=as.data.frame(Stats_cleaned)
+line_representation1 <- ggplot(dataframe, aes(x=year, y=fuelsnb, group = 1)) + geom_point() + geom_line() + labs(x="Year", y="Fuel Cost Usage", title = "Fuel cost for Small Narrow Bodies in the last 20 years")
+line_representation1
+line_representation2 <- ggplot(dataframe, aes(x=year, y=fuelwb, group = 1)) + geom_point() + geom_line() + labs(x="Year", y="Fuel Cost Usage", title = "Fuel cost for Wide Bodies in the last 20 years")
+line_representation2 
+```
+
+```{r, eval=TRUE, include=TRUE, message=TRUE, echo=FALSE}
+tabledata=as.data.frame(Stats_cleaned)
+tabledata <- tabledata %>% mutate(fuelconsumptionsnb = ((as.numeric(gallonssnb)/as.numeric(fuelsnb))*as.numeric(milessnb)))
+tabledata <- tabledata %>% mutate(fuelconsumptionwb = ((as.numeric(gallonswb)/as.numeric(fuelwb))*as.numeric(mileswb)))
+View(tabledata)
+boxplotsdata = data.frame(tabledata$year, tabledata$fuelconsumptionsnb, tabledata$fuelconsumptionwb)
+View(boxplotsdata)
+boxplotrepresentation1 <- ggplot(boxplotsdata, aes(x=tabledata.fuelconsumptionsnb)) + geom_boxplot() +coord_flip()
+boxplotrepresentation2 <- ggplot(boxplotsdata, aes(x=tabledata.fuelconsumptionwb)) + geom_boxplot() +coord_flip()
+boxplotrepresentation1
+boxplotrepresentation2
+meanofSNB <- mean(boxplotsdata$tabledata.fuelconsumptionsnb)
+meanofWB <- mean(boxplotsdata$tabledata.fuelconsumptionwb)
+print(format(meanofSNB, scientific = FALSE))
+print(format(meanofWB, scientific = FALSE))
+```
